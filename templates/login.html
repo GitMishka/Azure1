@@ -4,19 +4,21 @@
     <title>Login</title>
 </head>
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <form method="POST" action="{{ url_for('login') }}">
+    <div class="flash">
+        {% for message in get_flashed_messages() %}
+            <div>{{ message }}</div>
+        {% endfor %}
+    </div>
+    <h1>Login</h1>
+    <form method="POST" action="/">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required>
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
         <button type="submit">Log in</button>
     </form>
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
 </body>
 </html>

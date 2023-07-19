@@ -3,7 +3,7 @@ import psycopg2
 import config
 
 app = Flask(__name__)
-app.secret_key = 'your secret key'
+app.secret_key = 'secretkey' 
 
 def check_user(username, password):
     conn = psycopg2.connect(
@@ -13,7 +13,7 @@ def check_user(username, password):
         password=config.pg_password
     )
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
+    cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password,))
     user = cur.fetchone()
     conn.close()
 
@@ -22,21 +22,16 @@ def check_user(username, password):
     else:
         return False
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('login.html')
-
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    if check_user(username, password):
-        flash('Logged in successfully!', 'success')
-        return redirect(url_for('home'))
-    else:
-        flash('Invalid credentials. Please try again.', 'error')
-        return redirect(url_for('home'))
+    error = None
+    if request.method == 'POST':
+        if check_user(request.form['username'], request.form['password']):
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('home'))
+        else:
+            error = 'Invalid credentials. Please try again.'
+    return render_template('login.html', error=error)
 
 if __name__ == '__main__':
-    app
+    app.run(debug=True)
